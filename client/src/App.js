@@ -2,16 +2,24 @@ import { useMutation, useQuery } from "@apollo/client";
 import { useEffect, useState } from "react";
 import "./App.css";
 import { CREATE_USER } from "./mutations/user";
-import { GET_ALL_USERS } from "./query/user";
+import { GET_ALL_USERS, GET_ONE_USER } from "./query/user";
 
 function App() {
   const [newUser] = useMutation(CREATE_USER);
-  const { data, loading, error } = useQuery(GET_ALL_USERS);
+  const { data, loading, error, refetch } = useQuery(GET_ALL_USERS, {
+    pollInterval: 500,
+  });
+  const { data: oneUser, loading: loadingOneUser } = useQuery(GET_ONE_USER, {
+    variables: {
+      id: 1,
+    },
+  });
   const [users, setUsers] = useState([]);
   const [username, setUsername] = useState("");
   const [age, setAge] = useState(0);
 
   console.log(data);
+  console.log(oneUser, "oneUS");
 
   useEffect(() => {
     console.log(loading, "loaddd");
@@ -41,6 +49,11 @@ function App() {
     });
   };
 
+  const getAll = (e) => {
+    e.preventDefault();
+    refetch();
+  };
+
   return (
     <div className="App">
       <form>
@@ -60,14 +73,16 @@ function App() {
 
         <div className="btns">
           <button onClick={(e) => addUser(e)}>SOzdat`</button>
-          <button>Poluchit`</button>
+          <button onClick={(e) => getAll(e)}>Poluchit`</button>
         </div>
       </form>
       <div>
         {users.map((user) => {
-          <div className="user">
-            {user.id} {user.username} {user.age}
-          </div>;
+          return (
+            <div className="user">
+              {user.id} {user.username} {user.age}
+            </div>
+          );
         })}
       </div>
     </div>
